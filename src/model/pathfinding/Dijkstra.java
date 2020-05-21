@@ -22,12 +22,16 @@ public class Dijkstra {
 	private int checks = 0;
 	private int pathLength = 0;
 	
-	public Dijkstra(Point start, Point end, Node[][] nodes) {
+	public Dijkstra(Point start, Point end, Node[][] nodes, boolean maze) {
 		this.nodes = nodes;
 		for(int i = 0; i<this.nodes.length; i++) {
 			for(int j = 0; j<this.nodes[i].length; j++) {
 				this.nodes[i][j].resetForDijkstraSearch();
-				this.nodes[i][j].setNeighbours(this.nodes);
+				if(maze) {
+					this.nodes[i][j].setNeighbours(this.nodes, 4);
+				}else {
+					this.nodes[i][j].setNeighbours(this.nodes);
+				}
 			}
 		}
 		

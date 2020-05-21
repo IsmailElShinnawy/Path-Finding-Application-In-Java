@@ -21,12 +21,16 @@ public class AStar {
 	private int checks = 0;
 	private int pathLength = 0;
 
-	public AStar(Point start, Point end, Node[][] nodes) {
+	public AStar(Point start, Point end, Node[][] nodes, boolean maze) {
 		this.nodes = nodes;
 		for (int i = 0; i < this.nodes.length; i++) {
 			for (int j = 0; j < this.nodes[i].length; j++) {
 				this.nodes[i][j].resetForSearch();
-				this.nodes[i][j].setNeighbours(this.nodes);
+				if(maze) {
+					this.nodes[i][j].setNeighbours(this.nodes, 4);
+				}else {
+					this.nodes[i][j].setNeighbours(this.nodes);
+				}
 			}
 		}
 
@@ -43,7 +47,7 @@ public class AStar {
 		if (!openSet.isEmpty()) {
 			int winnerIndex = 0;
 			for (int i = 0; i < openSet.size(); i++) {
-				if (openSet.get(i).getfScore() < openSet.get(winnerIndex).getfScore()) {
+				if(Double.compare(openSet.get(i).getfScore(), openSet.get(winnerIndex).getfScore()) <0) {
 					winnerIndex = i;
 				}
 			}
@@ -78,9 +82,9 @@ public class AStar {
 					}
 				}
 			}
-
 		} else {
 			running = false;
+			found = false;
 		}
 	}
 
