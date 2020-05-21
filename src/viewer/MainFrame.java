@@ -43,6 +43,12 @@ public class MainFrame extends JFrame{
 		JOptionPane.showMessageDialog(new JFrame(), message, "No Path", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	public void displayCredits() {
+		String message = "<html><h3>A Java application to demonstrate different path finding algorithms and maze generation</h3>"
+				+ "<h3 style ='text-align: center'>Made by: Ismail El Shinnawy</h3></html>";
+		JOptionPane.showMessageDialog(new JFrame(), message, "Credits", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
 	public OptionsPanel getOptionsPanel() {
 		return this.optionsPanel;
 	}
