@@ -12,15 +12,23 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import model.mazeGeneration.MazeGenerator;
 import model.pathfinding.AStar;
+import model.pathfinding.BFS;
 import model.pathfinding.Dijkstra;
 import viewer.MainFrame;
 
 public class Controller implements ActionListener, MouseListener, MouseMotionListener, ChangeListener {
 
 	private MainFrame view;
+	
 	private AStar astar;
 	private Dijkstra dij;
+	private BFS bfs;
+	
+	private MazeGenerator mg;
+	private boolean maze = false;
+	
 	private Point mouse;
 	private boolean mouseInFrame;
 
@@ -43,71 +51,32 @@ public class Controller implements ActionListener, MouseListener, MouseMotionLis
 		if (e.getSource() instanceof JButton) {
 			JButton b = (JButton) e.getSource();
 			if (b.getActionCommand().equals("generateRandomMap")) {
+				maze = false;
 				double density = view.getOptionsPanel().getDensity();
 				view.getSketch().getMap().randomize(density);
 				view.getSketch().repaint();
-			} else if (b.getActionCommand().equals("resetMap")) {
+			}else if (b.getActionCommand().equals("generateMaze")) {
+				maze = true;
+				startMazeGeneration();
+			}else if (b.getActionCommand().equals("resetMap")) {
+				maze = false;
 				view.getSketch().getMap().reset();
 				view.getSketch().repaint();
 			} else if (b.getActionCommand().equals("Start") && view.getSketch().getMap().getStart() != null
 					&& view.getSketch().getMap().getEnd() != null) {
-//				System.out.println("Started Search...");
 				if (view.getOptionsPanel().getAlgorithm().equals("A* search")) {
 					startAStarSearch();
 				} else if (view.getOptionsPanel().getAlgorithm().equals("Dijkstra's")) {
 					startDijkstraSearch();
+				} else if (view.getOptionsPanel().getAlgorithm().equals("BFS")) {
+					startBFSSearch();
 				}
+			} else if(b.getActionCommand().equals("credits")) {
+				view.displayCredits();
 			}
 		} 
 	}
-
-	public void startDijkstraSearch() {
-		dij = new Dijkstra(view.getSketch().getMap().getStart(), view.getSketch().getMap().getEnd(),
-				view.getSketch().getMap().getNodes());
-		while (dij.isRunning()) {
-			dij.tick();
-			view.getSketch().getMap().updateMap(dij.getOpenSet(), dij.getClosedSet());
-			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
-			view.getSketch().revalidate();
-			try {
-				Thread.sleep(30);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		if (dij.isFound()) {
-			view.getSketch().getMap().updatePath(dij.constructPath());
-			view.getSketch().repaint();
-			view.displayPathDetails(dij.getPathLength(), dij.getChecks());
-		}else {
-			view.displayNoPathMessage();
-		}
-	}
-
-	public void startAStarSearch() {
-		astar = new AStar(view.getSketch().getMap().getStart(), view.getSketch().getMap().getEnd(),
-				view.getSketch().getMap().getNodes());
-
-		while (astar.isRunning()) {
-			astar.tick();
-			view.getSketch().getMap().updateMap(astar.getOpenSet(), astar.getClosedSet());
-			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
-			view.getSketch().revalidate();
-			try {
-				Thread.sleep(30);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		if (astar.isFound()) {
-			view.getSketch().getMap().updatePath(astar.constructPath());
-			view.getSketch().repaint();
-			view.displayPathDetails(astar.getPathLength(), astar.getChecks());
-		}else {
-			view.displayNoPathMessage();
-		}
-	}
-
+	
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
@@ -162,7 +131,7 @@ public class Controller implements ActionListener, MouseListener, MouseMotionLis
 	@Override
 	public void mouseMoved(MouseEvent e) {
 	}
-
+	
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSlider) {
@@ -170,12 +139,84 @@ public class Controller implements ActionListener, MouseListener, MouseMotionLis
 			if (slider.getName().equals("Size")) {
 				if (slider.getValue() % 10 == 0) {
 					view.getSketch().init(slider.getValue());
+					view.getSketch().getMap().randomize(view.getOptionsPanel().getDensity());
 					view.getSketch().repaint();
 				}
+			}else if(slider.getName().equals("Density")) {
+				double density = view.getOptionsPanel().getDensity();
+				view.getSketch().getMap().randomize(density);
+				view.getSketch().repaint();
 			}
 		}
 	}
 
+
+	public void startDijkstraSearch() {
+		dij = new Dijkstra(view.getSketch().getMap().getStart(), view.getSketch().getMap().getEnd(),
+				view.getSketch().getMap().getNodes(), maze);
+		while (dij.isRunning()) {
+			dij.tick();
+			view.getSketch().getMap().updateMap(dij.getOpenSet(), dij.getClosedSet());
+			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
+			view.getSketch().revalidate();
+		}
+		if (dij.isFound()) {
+			view.getSketch().getMap().updatePath(dij.constructPath());
+			view.getSketch().repaint();
+			view.displayPathDetails(dij.getPathLength(), dij.getChecks());
+		}else {
+			view.displayNoPathMessage();
+		}
+	}
+
+	public void startAStarSearch() {
+		astar = new AStar(view.getSketch().getMap().getStart(), view.getSketch().getMap().getEnd(),
+				view.getSketch().getMap().getNodes(), maze);
+
+		while (astar.isRunning()) {
+			astar.tick();
+			view.getSketch().getMap().updateMap(astar.getOpenSet(), astar.getClosedSet());
+			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
+			view.getSketch().revalidate();
+		}
+		if (astar.isFound()) {
+			view.getSketch().getMap().updatePath(astar.constructPath());
+			view.getSketch().repaint();
+			view.displayPathDetails(astar.getPathLength(), astar.getChecks());
+		}else {
+			view.displayNoPathMessage();
+		}
+	}
+	
+	public void startBFSSearch() {
+		bfs = new BFS(view.getSketch().getMap().getStart(), view.getSketch().getMap().getEnd(),
+				view.getSketch().getMap().getNodes(), maze);
+
+		while (bfs.isRunning()) {
+			bfs.tick();
+			view.getSketch().getMap().updateMap(bfs.getQ(), bfs.getClosedSet());
+			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
+			view.getSketch().revalidate();
+		}
+		if (bfs.isFound()) {
+			view.getSketch().getMap().updatePath(bfs.constructPath());
+			view.getSketch().repaint();
+			view.displayPathDetails(bfs.getPathLength(), bfs.getChecks());
+		}else {
+			view.displayNoPathMessage();
+		}
+	}
+	
+	public void startMazeGeneration() {
+		mg = new MazeGenerator(view.getSketch().getMap().getNodes());
+		while(mg.isRunning()) {
+			mg.tick();
+			view.getSketch().getMap().updateMap(mg.getNodes());
+			view.getSketch().paintImmediately(0, 0, view.getSketch().getWidth(), view.getSketch().getHeight());
+			view.getSketch().revalidate();
+		}
+	}
+		
 	public static void main(String[] args) {
 		new Controller();
 	}

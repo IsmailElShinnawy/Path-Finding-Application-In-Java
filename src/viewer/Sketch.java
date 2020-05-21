@@ -11,12 +11,11 @@ import model.maps.Map;
 public class Sketch extends JPanel{
 	
 	private Map map;
-	private int width, height;
+	private int width;
 		
 	public Sketch(int width, int height) {
 		super();
 		this.width = width;
-		this.height = height;
 		setSize(new Dimension(width, height));
 		setPreferredSize(new Dimension(width, height));
 		setFocusable(false);

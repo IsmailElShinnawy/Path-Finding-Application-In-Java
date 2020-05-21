@@ -15,14 +15,12 @@ import javax.swing.event.ChangeListener;
 @SuppressWarnings("serial")
 public class OptionsPanel extends JPanel{
 	
-	private JLabel algorithmsLabel;
 	private JComboBox<String> algorithmsComboBox;
 	private final String[] algorithms = {"A* search", "Dijkstra's", "BFS"};
 	
 	private JButton generateRandomMap;
 	private JButton resetMap;
-	private JButton loadMap;
-	private JButton saveMap;
+	private JButton generateMaze;
 	
 	private JLabel densityLabel;
 	private JSlider densitySlider;
@@ -32,6 +30,8 @@ public class OptionsPanel extends JPanel{
 	private JButton startSearchButton;
 	private JComboBox<String> toolsComboBox;
 	private final String[] tools = {"Start", "End", "Wall", "Eraser"};
+	
+	private JButton creditsButton;
 	
 	public OptionsPanel(int width, int height) {
 		
@@ -45,7 +45,6 @@ public class OptionsPanel extends JPanel{
 		
 			//algorithms combo box
 		
-		algorithmsLabel = new JLabel("Algoritm:");
 		algorithmsComboBox = new JComboBox<String>();
 		DefaultComboBoxModel<String> list = new DefaultComboBoxModel<String>();
 		for(String algorithm: algorithms) {
@@ -57,16 +56,16 @@ public class OptionsPanel extends JPanel{
 			//map buttons
 		
 		generateRandomMap = new JButton("Generate Random Map");
+		generateMaze = new JButton("Generate Maze");
 		resetMap = new JButton("Reset Map");
-		loadMap = new JButton("Load Map");
-		saveMap = new JButton("Save Map");
 		
 		generateRandomMap.setActionCommand("generateRandomMap");
+		generateMaze.setActionCommand("generateMaze");
 		resetMap.setActionCommand("resetMap");
 		
 			//sliders
 		
-		densityLabel = new JLabel("Density: ");
+		densityLabel = new JLabel("Wall Density: ");
 		densitySlider = new JSlider(0, 100);
 		densitySlider.setName("Density");
 		densitySlider.setMajorTickSpacing(10);
@@ -89,29 +88,33 @@ public class OptionsPanel extends JPanel{
 			toolList.addElement(tool);
 		toolsComboBox.setModel(toolList);
 		
+		creditsButton = new JButton("Credits");
+		creditsButton.setActionCommand("credits");
+		
 		//set layout used and add components
-		setLayout(new GridLayout(12, 1));
+		setLayout(new GridLayout(11, 1));
 		addComponents();
 	}
 	
 	public void setActionListener(ActionListener listener) {
 		generateRandomMap.addActionListener(listener);
+		generateMaze.addActionListener(listener);
 		resetMap.addActionListener(listener);
 		startSearchButton.addActionListener(listener);
+		creditsButton.addActionListener(listener);
 	}
 	
 	public void setChangeListener(ChangeListener listener) {
 		sizeSlider.addChangeListener(listener);
+		densitySlider.addChangeListener(listener);
 	}
 	
 	public void addComponents() {
-		add(algorithmsLabel);
 		add(algorithmsComboBox);
 		
 		add(generateRandomMap);
+		add(generateMaze);
 		add(resetMap);
-		add(loadMap);
-		add(saveMap);
 		
 		add(toolsComboBox);
 		
@@ -121,6 +124,7 @@ public class OptionsPanel extends JPanel{
 		add(sizeSlider);
 		
 		add(startSearchButton);
+		add(creditsButton);
 	}
 	
 	public String getTool() {

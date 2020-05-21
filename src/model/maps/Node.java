@@ -2,8 +2,9 @@ package model.maps;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 
-public class Node implements Comparable<Node> {
+public class Node  {
 
 	private int i, j;
 	private int size;
@@ -12,6 +13,7 @@ public class Node implements Comparable<Node> {
 	private boolean wall = false;
 	private boolean start = false;
 	private boolean end = false;
+	private boolean visited = false;
 
 	private double fScore = 0, gScore = 0, hScore = 0;
 	private Node previous;
@@ -66,6 +68,58 @@ public class Node implements Comparable<Node> {
 			}
 		}
 	}
+	
+	public void setNeighbours(Node[][] nodes, int numberOfNeighbours) {
+		neighbours = new Node[numberOfNeighbours];
+		if (j > 0) {
+			if (!nodes[j - 1][i].isWall())
+				neighbours[0] = nodes[j - 1][i];
+		}
+		if (i < nodes[j].length - 1) {
+			if (!nodes[j][i + 1].isWall()) {
+				neighbours[1] = nodes[j][i + 1];
+			}
+		}
+		if (j < nodes.length - 1) {
+			if (!nodes[j + 1][i].isWall())
+				neighbours[2] = nodes[j + 1][i];
+		}
+		if (i > 0) {
+			if (!nodes[j][i - 1].isWall())
+				neighbours[3] = nodes[j][i - 1];
+		}
+	}
+	
+	public void setMazeNeighbours(Node[][] nodes) {
+		neighbours = new Node[4];
+		if(!wall) {
+			if(j>1) {
+				neighbours[0] = nodes[j-2][i];
+			}
+			if(j<nodes.length-2) {
+				neighbours[1] = nodes[j+2][i];
+			}
+			if(i>1) {
+				neighbours[2] = nodes[j][i-2];
+			}
+			if(i<nodes[j].length-2) {
+				neighbours[3] = nodes[j][i+2];
+			}
+		}
+	}
+	
+	public Node getRandomMazeNeighbour() {
+		ArrayList<Node> tmp = new ArrayList<Node>();
+
+		for (Node n : neighbours)
+			if (n != null)
+				if (!n.isVisited())
+					tmp.add(n);
+
+		if (tmp.size() == 0)
+			return null;
+		return tmp.get((int) (Math.random() * tmp.size()));
+	}
 
 	public void render(Graphics g) {
 		g.setColor(color);
@@ -77,6 +131,10 @@ public class Node implements Comparable<Node> {
 	public void reset() {
 		color = Color.white;
 		wall = false;
+		start = false;
+		end = false;
+		//
+		visited = false;
 	}
 
 	public void resetForSearch() {
@@ -85,26 +143,19 @@ public class Node implements Comparable<Node> {
 		hScore = 0;
 		previous = null;
 		neighbours = null;
+		visited = false;
+		if(!wall) color = Color.white;
+		if(start) color = Color.green;
+		if(end) color = Color.red;
 	}
 	
 	public void resetForDijkstraSearch() {
+		resetForSearch();
 		gScore = Double.POSITIVE_INFINITY;
-		previous = null;
-		neighbours = null;
 	}
 
 	public boolean equals(Node other) {
 		return i == other.i && j == other.j;
-	}
-
-	public int compareTo(Node other) {
-		if (fScore < other.fScore) {
-			return 1;
-		} else if (fScore > other.fScore) {
-			return -1;
-		} else {
-			return 0;
-		}
 	}
 
 	public String toString() {
@@ -138,6 +189,10 @@ public class Node implements Comparable<Node> {
 	public void setEnd(boolean end) {
 		this.end = end;
 	}
+	
+	public void setVisited(boolean visited) {
+		this.visited = visited;
+	}
 
 	public Node[] getNeighbours() {
 		return this.neighbours;
@@ -145,6 +200,10 @@ public class Node implements Comparable<Node> {
 
 	public double getfScore() {
 		return fScore;
+	}
+	
+	public void setPrevious(Node previous) {
+		this.previous = previous;
 	}
 
 	public void setfScore(double fScore) {
@@ -175,12 +234,14 @@ public class Node implements Comparable<Node> {
 		return j;
 	}
 
-	public void setPrevious(Node previous) {
-		this.previous = previous;
-	}
-
 	public Node getPrevious() {
 		return previous;
 	}
+	
+	public boolean isVisited() {
+		return visited;
+	}
+	
+	
 
 }
